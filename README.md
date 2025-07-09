@@ -40,8 +40,7 @@ On linux, we need to set the admin password (system level and database passwords
 postgres password (system):
 
 ```bash
-# Linux ONLY
-# create user=postgres
+# Linux ONLY create user postgres
 sudo passwd postgres
 ```
 
