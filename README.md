@@ -20,6 +20,8 @@ Enter psql shell using `psql` command:
 psql postgres
 ```
 
+(`sudo -u postgres psql` on Linux)
+
 The prompt should show `postgres=#`. Create a new database, e.g. `gator` database:
 
 ```sql
@@ -38,6 +40,7 @@ On linux, we need to set the admin password (system level and database passwords
 postgres password (system):
 
 ```bash
+# user=postgres
 sudo passwd postgres
 ```
 
@@ -57,13 +60,21 @@ Above, we simply set the passwords as "postgres".
 that we want.
 - DOWN migration reverts the database to its previous state.
 
-postgres connection_string:
+postgres connection_string for MacOS:
 
 ```bash
 postgres://USERNAME:@localhost:5432/gator
 ```
 
-where `USERNAME` is the local username on the machine (e.g., `user123`).
+where `USERNAME` is the local username on the machine (e.g., `user123`), and for
+Linux:
+
+```bash
+postgres://postgres:PASSWORD@localhost:5432/gator
+```
+
+where username ("postgres") and password (e.g., "postgres") are for the postgres
+user (see steps to set them above).
 
 Postgress: DB up migration (goose migration):
 
