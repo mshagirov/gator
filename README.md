@@ -83,7 +83,14 @@ postgres://postgres:PASSWORD@localhost:5432/gator
 ```
 
 where username ("postgres") and password (e.g., "postgres") are for the postgres
-user (see steps to set them above).
+user (see steps to set them above). The connection string can be tested with `psql`:
+
+```bash
+# macos
+psql "postgres://USERNAME:@localhost:5432/gator"
+```
+
+(edit the connection for Linux to include database password).
 
 Postgress: DB up migration (goose migration):
 
