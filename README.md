@@ -47,10 +47,19 @@ sudo passwd postgres
 - After creating your database, set the database password in the psql shell:
 
 ```sql
+-- Linux ONLY
 ALTER USER postgres PASSWORD 'postgres';
 ```
 
 Above, we simply set the passwords as "postgres".
+
+You can check the Postgres version in `psql` shell by running:
+
+```sql
+SELECT version();
+```
+
+Exit the `psql` shell by entering commands `exit` or `\q`.
 
 ## Goose Migration
 
