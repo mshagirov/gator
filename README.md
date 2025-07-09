@@ -60,8 +60,10 @@ that we want.
 postgres connection_string:
 
 ```bash
-postgres://murat:@localhost:5432/gator
+postgres://USERNAME:@localhost:5432/gator
 ```
+
+where `USERNAME` is the local username on the machine (e.g., `user123`).
 
 Postgress: DB up migration (goose migration):
 
