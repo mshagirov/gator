@@ -38,7 +38,6 @@ func main() {
 
 	if err := Commands.run(&State, cmd); err != nil {
 		fmt.Println(err)
-		fmt.Println("")
 		os.Exit(1)
 	}
 }

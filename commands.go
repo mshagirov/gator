@@ -50,29 +50,59 @@ func getCommands() commands {
 	Commands.register("reset", handlerReset)
 	Commands.register("users", handlerUsers)
 	Commands.register("agg", handlerAgg)
-	Commands.register("addfeed", handlerAddfeed)
 	Commands.register("feeds", handlerFeeds)
-	Commands.register("follow", handlerFollow)
-	Commands.register("following", handlerFollowing)
+	Commands.register("addfeed", middlewareLoggedIn(handlerAddfeed))
+	Commands.register("follow", middlewareLoggedIn(handlerFollow))
+	Commands.register("following", middlewareLoggedIn(handlerFollowing))
+	Commands.register("unfollow", middlewareLoggedIn(handlerUnfollow))
 	return Commands
 }
 
-func handlerFollowing(s *state, cmd command) error {
-	if len(cmd.Args) > 0 {
-		return fmt.Errorf("Error: too many arguments!\nUsage:\n  following")
+func middlewareLoggedIn(handler func(s *state, cmd command, user database.User) error) func(*state, command) error {
+	dryHandler := func(s *state, cmd command) error {
+		user, err := s.db.GetUser(context.Background(), s.Config.CurrentUserName)
+		if err != nil {
+			return err
+		}
+		return handler(s, cmd, user)
 	}
-	u_name := s.Config.CurrentUserName
-	u_follows, err := s.db.GetFeedFollowsForUser(context.Background(), u_name)
+	return dryHandler
+}
+
+func handlerUnfollow(s *state, cmd command, user database.User) error {
+	if len(cmd.Args) < 1 {
+		return fmt.Errorf("Error: missing required argument!\nUsage:\n  unfollow <url>")
+	}
+	url := cmd.Args[0]
+	f, err := s.db.GetFeedWithUrl(context.Background(), url)
 	if err != nil {
 		return err
 	}
-	for _, v := range u_follows {
-		fmt.Printf("- \"%v\" : \"%v\"", v.FeedName, v.FeedUrl)
+	params := database.DeleteFeedForUserIdParams{
+		UserID: user.ID,
+		FeedID: f.ID,
+	}
+	if err := s.db.DeleteFeedForUserId(context.Background(), params); err != nil {
+		return err
 	}
 	return nil
 }
 
-func handlerFollow(s *state, cmd command) error {
+func handlerFollowing(s *state, cmd command, user database.User) error {
+	if len(cmd.Args) > 0 {
+		return fmt.Errorf("Error: too many arguments!\nUsage:\n  following")
+	}
+	u_follows, err := s.db.GetFeedFollowsForUser(context.Background(), user.Name)
+	if err != nil {
+		return err
+	}
+	for _, v := range u_follows {
+		fmt.Printf("- \"%v\" : \"%v\"\n", v.FeedName, v.FeedUrl)
+	}
+	return nil
+}
+
+func handlerFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.Args) < 1 {
 		return fmt.Errorf("Error: missing required argument!\nUsage:\n  follow <url>")
 	}
@@ -81,16 +111,12 @@ func handlerFollow(s *state, cmd command) error {
 	if err != nil {
 		return err
 	}
-	u, err := s.db.GetUser(context.Background(), s.Config.CurrentUserName)
-	if err != nil {
-		return err
-	}
 	time_now := time.Now()
 	params := database.CreateFeedFollowParams{
 		ID:        uuid.New(),
 		CreatedAt: time_now,
 		UpdatedAt: time_now,
-		UserID:    u.ID,
+		UserID:    user.ID,
 		FeedID:    f.ID,
 	}
 	feed_follow_row, err := s.db.CreateFeedFollow(context.Background(), params)
@@ -127,13 +153,9 @@ func handlerFeeds(s *state, cmd command) error {
 	return nil
 }
 
-func handlerAddfeed(s *state, cmd command) error {
+func handlerAddfeed(s *state, cmd command, user database.User) error {
 	if len(cmd.Args) < 2 {
 		return fmt.Errorf("Error: missing required argument(s)!\nUsage:\n  addfeed <name> <url>")
-	}
-	u, err := s.db.GetUser(context.Background(), s.Config.CurrentUserName)
-	if err != nil {
-		return fmt.Errorf("%v;\nUser might be missing from the database", err)
 	}
 	time_now := time.Now()
 	params := database.CreateFeedParams{
@@ -142,7 +164,7 @@ func handlerAddfeed(s *state, cmd command) error {
 		UpdatedAt: time_now,
 		Name:      cmd.Args[0],
 		Url:       cmd.Args[1],
-		UserID:    u.ID,
+		UserID:    user.ID,
 	}
 	f, err := s.db.CreateFeed(context.Background(), params)
 	if err != nil {
@@ -153,7 +175,7 @@ func handlerAddfeed(s *state, cmd command) error {
 		ID:        uuid.New(),
 		CreatedAt: time_now,
 		UpdatedAt: time_now,
-		UserID:    u.ID,
+		UserID:    user.ID,
 		FeedID:    f.ID,
 	}
 	feed_follow_row, err := s.db.CreateFeedFollow(context.Background(), follow_params)
