@@ -63,6 +63,15 @@ Exit the `psql` shell by entering commands `exit` or `\q`.
 
 ## Goose Migration
 
+> [goose](https://github.com/pressly/goose) -- a SQL database migration tool
+written in go.
+
+Install `goose` using `go install`:
+
+```bash
+go install github.com/pressly/goose/v3/cmd/goose@latest
+```
+
 > Migration : a set of changes to a database table.
 
 - UP migration moves state of the database from its current schema to the schema
