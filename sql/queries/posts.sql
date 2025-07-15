@@ -27,12 +27,14 @@ WITH user_feed_ids AS (
   SELECT
     feed_id
   FROM feed_follows
-  WHERE user_id = $1
+  WHERE feed_follows.user_id = $1
 )
 SELECT
-  posts.*
+  posts.*,
+  feeds.url AS feed_url
 FROM user_feed_ids
 INNER JOIN posts ON user_feed_ids.feed_id = posts.feed_id
+INNER JOIN feeds ON user_feed_ids.feed_id = feeds.id
 ORDER BY posts.published_at DESC NULLS LAST
 LIMIT $2 
 ;

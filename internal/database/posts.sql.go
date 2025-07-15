@@ -41,10 +41,10 @@ type CreatePostParams struct {
 	ID          uuid.UUID
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	Title       sql.NullString
+	Title       string
 	Url         string
 	Description sql.NullString
-	PublishedAt sql.NullTime
+	PublishedAt time.Time
 	FeedID      uuid.UUID
 }
 
@@ -79,12 +79,14 @@ WITH user_feed_ids AS (
   SELECT
     feed_id
   FROM feed_follows
-  WHERE user_id = $1
+  WHERE feed_follows.user_id = $1
 )
 SELECT
-  posts.id, posts.created_at, posts.updated_at, posts.title, posts.url, posts.description, posts.published_at, posts.feed_id
+  posts.id, posts.created_at, posts.updated_at, posts.title, posts.url, posts.description, posts.published_at, posts.feed_id,
+  feeds.url AS feed_url
 FROM user_feed_ids
 INNER JOIN posts ON user_feed_ids.feed_id = posts.feed_id
+INNER JOIN feeds ON user_feed_ids.feed_id = feeds.id
 ORDER BY posts.published_at DESC NULLS LAST
 LIMIT $2
 `
@@ -94,15 +96,27 @@ type GetPostsForUserIdParams struct {
 	Limit  int32
 }
 
-func (q *Queries) GetPostsForUserId(ctx context.Context, arg GetPostsForUserIdParams) ([]Post, error) {
+type GetPostsForUserIdRow struct {
+	ID          uuid.UUID
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	Title       string
+	Url         string
+	Description sql.NullString
+	PublishedAt time.Time
+	FeedID      uuid.UUID
+	FeedUrl     string
+}
+
+func (q *Queries) GetPostsForUserId(ctx context.Context, arg GetPostsForUserIdParams) ([]GetPostsForUserIdRow, error) {
 	rows, err := q.db.QueryContext(ctx, getPostsForUserId, arg.UserID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Post
+	var items []GetPostsForUserIdRow
 	for rows.Next() {
-		var i Post
+		var i GetPostsForUserIdRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.CreatedAt,
@@ -112,6 +126,7 @@ func (q *Queries) GetPostsForUserId(ctx context.Context, arg GetPostsForUserIdPa
 			&i.Description,
 			&i.PublishedAt,
 			&i.FeedID,
+			&i.FeedUrl,
 		); err != nil {
 			return nil, err
 		}
