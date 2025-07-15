@@ -188,12 +188,19 @@ func handlerAddfeed(s *state, cmd command, user database.User) error {
 }
 
 func handlerAgg(s *state, cmd command) error {
-	rssData, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	if len(cmd.Args) < 1 {
+		return fmt.Errorf("Error: missing required argument time_between_reqs! E.g. \"10s\", \"1h\", ...\nUsage:\n  agg 15m")
+	}
+
+	timeBetweenRequests, err := time.ParseDuration(cmd.Args[0])
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%+v\n", *rssData)
-	return nil
+
+	ticker := time.NewTicker(timeBetweenRequests)
+	for ; ; <-ticker.C {
+		scrapeFeeds(s)
+	}
 }
 
 func handlerUsers(s *state, cmd command) error {

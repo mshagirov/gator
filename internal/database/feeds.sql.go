@@ -179,12 +179,11 @@ func (q *Queries) GetNextFeedToFetch(ctx context.Context) (Feed, error) {
 	return i, err
 }
 
-const markFeedFetched = `-- name: MarkFeedFetched :one
+const markFeedFetched = `-- name: MarkFeedFetched :exec
 
 UPDATE feeds
 SET updated_at = $2, last_fetched_at = $2
 WHERE id=$1
-RETURNING id, created_at, updated_at, last_fetched_at, name, url, user_id
 `
 
 type MarkFeedFetchedParams struct {
@@ -192,17 +191,7 @@ type MarkFeedFetchedParams struct {
 	UpdatedAt time.Time
 }
 
-func (q *Queries) MarkFeedFetched(ctx context.Context, arg MarkFeedFetchedParams) (Feed, error) {
-	row := q.db.QueryRowContext(ctx, markFeedFetched, arg.ID, arg.UpdatedAt)
-	var i Feed
-	err := row.Scan(
-		&i.ID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.LastFetchedAt,
-		&i.Name,
-		&i.Url,
-		&i.UserID,
-	)
-	return i, err
+func (q *Queries) MarkFeedFetched(ctx context.Context, arg MarkFeedFetchedParams) error {
+	_, err := q.db.ExecContext(ctx, markFeedFetched, arg.ID, arg.UpdatedAt)
+	return err
 }
