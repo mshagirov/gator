@@ -152,6 +152,7 @@ cd gator/sql/schema
 postgres connection_string for MacOS:
 
 ```bash
+# macos
 postgres://USERNAME:@localhost:5432/gator
 ```
 
@@ -159,6 +160,7 @@ where `USERNAME` is the local username on the machine (e.g., `user123`), and for
 Linux:
 
 ```bash
+# Linux
 postgres://postgres:PASSWORD@localhost:5432/gator
 ```
 
@@ -166,8 +168,8 @@ where username ("postgres") and password (e.g., "postgres") are for the postgres
 user (see steps to set them above). The connection string can be tested with `psql`:
 
 ```bash
-# macos
-psql "postgres://USERNAME:@localhost:5432/gator"
+# macos, e.g.:
+psql "postgres://murat:@localhost:5432/gator"
 ```
 
 (edit the connection for Linux to include database password).
@@ -194,14 +196,14 @@ for MacOS:
 ```bash
 # MacOS
 cd ./sql/schema/
-goose postgres "postgres://USERNAME:@localhost:5432/gator" up
+goose postgres "postgres://murat:@localhost:5432/gator" up
 ```
 
 > set `USERNAME` to your MacOS username.
 
 ## Gator Configuration File
 
-Create `~/.gatorconfig.json` with the following config (ser `current_user_name`
+Create `~/.gatorconfig.json` with the following config (set `current_user_name`
 as your username, e.g., below I use "murat"):
 
 ```json
