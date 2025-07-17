@@ -238,9 +238,64 @@ gator CMD
 - `unfollow URL` : unfollow RSS feed.
 - `agg TIME_BETWEEN_REQS`: aggregate (update) RSS feeds at a set interval,
 e.g. 30s, 10m, 2h, ...
+  - `agg` can be ran continuosly in a separate terminal, or started and
+  then stopped (stop with `Ctrl+C`) once all feeds are updated.
 - `browse` : browse latest 2 posts from feeds you are following.
 - `browse NUMBER_OF_POSTS`: browse a set number of latest posts from your feeds.
 - `reset` : delete all users and feeds, and reset database (BE CAREFUL).
+
+## Example RSS Feeds & Usage
+
+- CNA Latest News, `https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml`
+- TechCrunch, `https://techcrunch.com/feed/`
+- Hacker News, `https://news.ycombinator.com/rss`
+
+Register above feeds with `gator addfeed`:
+
+```bash
+# register/login your gator account
+$ gator register murat
+User murat with uuid=7817ffe0-a5fd-4022-9516-10eee9750302 created at 2025-07-17 21:11:14
+$ gator users
+* murat (current)
+$ gator addfeed "Hacker News" "https://news.ycombinator.com/rss"
+murat subscribed to Hacker News
+$ gator following
+- "Hacker News" : "https://news.ycombinator.com/rss"
+$ gator agg 10s
+Fetching: Hacker News
+ |- Link: https://news.ycombinator.com/
+ |- Description: Links for the intellectually curious, ranked by readers.
+ \__
+    |- Title:   Upcoming coordinated security fix for all Matrix server implementations
+    |  Updated: 2025-07-17 21:13:18.297188 +0000 +0000
+    |
+    |- Title:   My bank keeps on undermining anti-phishing education
+    |  Updated: 2025-07-17 21:13:18.301062 +0000 +0000
+    |
+    |- Title:   Hand: open-source Robot Hand
+    |  Updated: 2025-07-17 21:13:18.302651 +0000 +0000
+...
+^C
+# ^- cancel agg with Ctrl+C
+$ gator browse
+
+>  Hand: open-source Robot Hand
+   Feed: https://news.ycombinator.com/rss
+   PubDate: 2025-07-17 12:08:38 +0000 +0000
+   URL: https://github.com/pollen-robotics/AmazingHand
+   ---
+   <a href="https://news.ycombinator.com/item?id=44592413">Comments</a>
+
+>  My bank keeps on undermining anti-phishing education
+   Feed: https://news.ycombinator.com/rss
+   PubDate: 2025-07-17 12:04:53 +0000 +0000
+   URL: http://moritz-mander.de/blog/my_bank_keeps_on_undermining_anti-phishing_education/
+   ---
+   <a href="https://news.ycombinator.com/item?id=44592377">Comments</a>
+```
+
+Updated your feeds with `gator agg`
 
 ## Developing & Extending Gator
 
