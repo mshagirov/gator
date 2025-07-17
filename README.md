@@ -1,4 +1,4 @@
-# RSS Feed aggre**gator**
+# Gator : RSS Feed aggre**GATOR**
 
 ## Requirements
 
