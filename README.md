@@ -4,7 +4,7 @@
 
 - Go
   - Required to install and build the gator application. Once compiled gator
-  can be used as a stand along application without go.
+  can be used as a standalone application without go.
 (see [./go.mod](./go.mod) for Go version).
 - Postgres
   - Database server
